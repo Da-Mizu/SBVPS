@@ -143,7 +143,7 @@ def main():
     parser.add_argument(
         "--model-version",
         type=str,
-        default="v1.0",
+        default="v1.1",
         help="Model version to use"
     )
     parser.add_argument(

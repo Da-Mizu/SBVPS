@@ -74,6 +74,12 @@ class Predictor:
         # Décoder
         predicted_results = label_encoder.inverse_transform(predictions)
         
+        # Map classes to their indices (classes may not be in order 1, X, 2)
+        class_to_idx = {cls: idx for idx, cls in enumerate(label_encoder.classes_)}
+        idx_1 = class_to_idx.get('1', 0)
+        idx_x = class_to_idx.get('X', 1)
+        idx_2 = class_to_idx.get('2', 2)
+        
         # Créer résultats (avec ou sans match_id)
         has_match_id = 'match_id' in features_df.columns
         
@@ -82,17 +88,17 @@ class Predictor:
                 'match_id': features_df['match_id'].values,
                 'predicted_result': predicted_results,
                 'confidence': np.max(probabilities, axis=1),
-                'prob_1': probabilities[:, 0],
-                'prob_x': probabilities[:, 1],
-                'prob_2': probabilities[:, 2],
+                'prob_1': probabilities[:, idx_1],
+                'prob_x': probabilities[:, idx_x],
+                'prob_2': probabilities[:, idx_2],
             })
         else:
             results_df = pd.DataFrame({
                 'predicted_result': predicted_results,
                 'confidence': np.max(probabilities, axis=1),
-                'prob_1': probabilities[:, 0],
-                'prob_x': probabilities[:, 1],
-                'prob_2': probabilities[:, 2],
+                'prob_1': probabilities[:, idx_1],
+                'prob_x': probabilities[:, idx_x],
+                'prob_2': probabilities[:, idx_2],
             })
         
         logger.info(f"  Prédictions générées")
