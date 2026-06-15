@@ -301,3 +301,143 @@ class FakeDataCollector:
 
         logger.info(f"✅ {len(odds_list)} cotes générées pour {len(matches)} matchs")
         return odds_list
+
+    # ========================================================================
+    # WORLD CUP SUPPORT
+    # ========================================================================
+    
+    WORLD_CUP_TEAMS = [
+        # CONMEBOL (South America)
+        {"name": "Argentina", "country": "Argentina", "group": "A"},
+        {"name": "Brazil", "country": "Brazil", "group": "A"},
+        {"name": "Uruguay", "country": "Uruguay", "group": "A"},
+        {"name": "Paraguay", "country": "Paraguay", "group": "A"},
+        
+        # UEFA (Europe)
+        {"name": "France", "country": "France", "group": "B"},
+        {"name": "Germany", "country": "Germany", "group": "B"},
+        {"name": "England", "country": "England", "group": "B"},
+        {"name": "Spain", "country": "Spain", "group": "B"},
+        {"name": "Italy", "country": "Italy", "group": "C"},
+        {"name": "Netherlands", "country": "Netherlands", "group": "C"},
+        {"name": "Belgium", "country": "Belgium", "group": "C"},
+        {"name": "Portugal", "country": "Portugal", "group": "C"},
+        
+        # AFC (Asia)
+        {"name": "Japan", "country": "Japan", "group": "D"},
+        {"name": "South Korea", "country": "South Korea", "group": "D"},
+        {"name": "Iran", "country": "Iran", "group": "D"},
+        {"name": "Australia", "country": "Australia", "group": "D"},
+        
+        # CAF (Africa)
+        {"name": "Nigeria", "country": "Nigeria", "group": "E"},
+        {"name": "Egypt", "country": "Egypt", "group": "E"},
+        {"name": "Cameroon", "country": "Cameroon", "group": "E"},
+        {"name": "Morocco", "country": "Morocco", "group": "E"},
+        
+        # CONCACAF (North America)
+        {"name": "Mexico", "country": "Mexico", "group": "F"},
+        {"name": "USA", "country": "USA", "group": "F"},
+        {"name": "Canada", "country": "Canada", "group": "F"},
+        {"name": "Costa Rica", "country": "Costa Rica", "group": "F"},
+        
+        # OFC (Oceania) + Additional UEFA
+        {"name": "New Zealand", "country": "New Zealand", "group": "G"},
+        {"name": "Croatia", "country": "Croatia", "group": "G"},
+        {"name": "Serbia", "country": "Serbia", "group": "G"},
+        {"name": "Poland", "country": "Poland", "group": "G"},
+        
+        # Additional teams
+        {"name": "Argentina", "country": "Argentina", "group": "H"},
+        {"name": "Senegal", "country": "Senegal", "group": "H"},
+        {"name": "Denmark", "country": "Denmark", "group": "H"},
+        {"name": "Tunisia", "country": "Tunisia", "group": "H"},
+    ]
+    
+    def generate_world_cup_teams(self):
+        """Génère les 32 équipes de la Coupe du Monde"""
+        teams_list = []
+        for idx, team_data in enumerate(self.WORLD_CUP_TEAMS, 1):
+            teams_list.append({
+                "id": idx,
+                "name": team_data["name"],
+                "country": team_data["country"],
+                "group": team_data["group"],
+                "league": "World Cup 2026",
+                "founded_year": random.randint(1880, 1950)
+            })
+        
+        logger.info(f"✅ {len(teams_list)} équipes World Cup générées")
+        return teams_list
+    
+    def generate_world_cup_matches(self, teams, season=2026):
+        """
+        Génère les matchs de groupe de la Coupe du Monde (64 matchs)
+        
+        Args:
+            teams: Liste des équipes
+            season: Saison (2026)
+            
+        Returns:
+            Liste de dicts {league, season, match_date, home_team, away_team, ...}
+        """
+        # Initialiser Elo pour World Cup
+        self._initialize_elo([t["name"] for t in teams])
+        
+        matches = []
+        match_id = 1
+        start_date = datetime(2026, 6, 11)  # Start date of World Cup
+        
+        # Créer les matchs de groupe (4 équipes x 6 groupes = 8 matchs par groupe)
+        groups = {}
+        for team in teams:
+            group = team["group"]
+            if group not in groups:
+                groups[group] = []
+            groups[group].append(team["name"])
+        
+        match_date = start_date
+        
+        # Pour chaque groupe, créer les matchs round-robin
+        for group_name in sorted(groups.keys()):
+            group_teams = groups[group_name]
+            
+            # Round-robin dans le groupe (chaque équipe joue chaque autre)
+            for i in range(len(group_teams)):
+                for j in range(i + 1, len(group_teams)):
+                    home_team = group_teams[i]
+                    away_team = group_teams[j]
+                    
+                    # Générer le résultat
+                    home_goals, away_goals = self._generate_match_result(home_team, away_team)
+                    result = self._determine_result(home_goals, away_goals)
+                    
+                    matches.append({
+                        "match_id": match_id,
+                        "league": "World Cup",
+                        "season": season,
+                        "match_date": match_date.strftime("%Y-%m-%d"),
+                        "match_time": f"{random.randint(14, 21)}:00",
+                        "home_team": home_team,
+                        "away_team": away_team,
+                        "home_team_id": teams[[t["name"] for t in teams].index(home_team)]["id"],
+                        "away_team_id": teams[[t["name"] for t in teams].index(away_team)]["id"],
+                        "home_goals": home_goals,
+                        "away_goals": away_goals,
+                        "result": result,
+                        "status": "played",
+                        "group": group_name,
+                        "attendance": random.randint(40000, 80000)
+                    })
+                    
+                    match_id += 1
+                    # Avancer de 1-2 jours entre les matchs
+                    match_date += timedelta(days=random.randint(1, 2))
+        
+        logger.info(f"✅ {len(matches)} matchs World Cup générés")
+        return matches
+    
+    def matches_to_dataframe(self, matches):
+        """Convertit une liste de matchs en DataFrame pandas"""
+        import pandas as pd
+        return pd.DataFrame(matches)

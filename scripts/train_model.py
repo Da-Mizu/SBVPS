@@ -24,7 +24,7 @@ def main():
         "--league",
         type=str,
         default="Ligue 1",
-        choices=["Ligue 1", "Premier League", "La Liga", "Serie A"],
+        choices=["Ligue 1", "Premier League", "La Liga", "Serie A", "World Cup"],
         help="Ligue a traiter (defaut: Ligue 1)"
     )
     parser.add_argument(

@@ -29,6 +29,20 @@ DB_PATH = DATABASE_DIR / "sbvps.db"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 LOG_FILE = PROJECT_ROOT / "logs" / "sbvps.log"
 
+# Football Data API (https://www.football-data.org/)
+FOOTBALL_DATA_API_TOKEN = os.getenv("FOOTBALL_DATA_API_TOKEN", "")
+FOOTBALL_DATA_API_BASE_URL = "https://api.football-data.org/v4"
+API_COMPETITION_CODES = {
+    "WORLD_CUP": "WC",
+    "LIGUE_1": "FL1",
+    "PREMIER_LEAGUE": "PL",
+    "LA_LIGA": "PD",
+    "SERIE_A": "SA",
+    "BUNDESLIGA": "BL1",
+}
+# World Cup 2026 competition code
+WORLD_CUP_COMPETITION_ID = "WC/2026"
+
 # Football-Data.org API
 FOOTBALL_DATA_API_TOKEN = os.getenv("FOOTBALL_DATA_API_TOKEN", "")
 
